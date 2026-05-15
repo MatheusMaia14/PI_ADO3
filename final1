@@ -1,0 +1,108 @@
+package Aulas_PI;
+
+import java.util.Scanner;
+import java.util.Random;
+
+public class ADO3 {
+
+    public static void imprimirMatriz(int[][] campo, boolean mostrarBombas) {
+        System.out.println("\n--- TABULEIRO ATUAL ---");
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 6; j++) {
+                if (campo[i][j] == 1) {
+                    System.out.print("x ");
+                } 
+                else if (mostrarBombas && campo[i][j] == -1) {
+                    System.out.print("b ");
+                } 
+                else {
+                    System.out.print("_ ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    public static boolean temBombaAoRedor(int[][] campo, int linha, int coluna) {
+        for (int i = linha - 1; i <= linha + 1; i++) {
+            for (int j = coluna - 1; j <= coluna + 1; j++) {
+                if (i >= 0 && i < 4 && j >= 0 && j < 6) {
+                    if (campo[i][j] == -1) {
+                        return true; 
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static void main(String[] args) {
+        int[][] campo = new int[4][6];
+        Scanner leia = new Scanner(System.in);
+        Random gerador = new Random();
+        int pontuacao = 0;
+
+        System.out.println("\nBem vindo ao Campo Minado!");
+        System.out.println("O Objetivo é encontrar as posições seguras, mas cuidado para não explodir!");
+
+        System.out.println("\nQuantas bombas você deseja colocar no campo?");
+        int quantidadeBombas = leia.nextInt();
+
+        int bombasColocadas = 0;
+        while (bombasColocadas < quantidadeBombas) {
+            int linha = gerador.nextInt(4);
+            int coluna = gerador.nextInt(6);
+
+            if (campo[linha][coluna] == 0) {
+                campo[linha][coluna] = -1;
+                bombasColocadas++;
+            }
+        }
+
+        int totalParaVencer = 24 - quantidadeBombas;
+        boolean jogoAtivo = true;
+
+        while (jogoAtivo) {
+            imprimirMatriz(campo, false);
+            
+            System.out.println("\nPontuação atual: " + pontuacao);
+            System.out.println("Digite a linha (0-3):");
+            int linhaEscolhida = leia.nextInt();
+            System.out.println("Digite a coluna (0-5):");
+            int colunaEscolhida = leia.nextInt();
+
+            if (linhaEscolhida < 0 || linhaEscolhida > 3 || colunaEscolhida < 0 || colunaEscolhida > 5) {
+                System.out.println("\nPosição inválida! Escolha números entre 0-3 para linha e 0-5 para coluna.");
+                continue;
+            }
+
+            if (campo[linhaEscolhida][colunaEscolhida] == -1) {
+                System.out.println("\nBOOM! Você encontrou uma bomba (b)! Game Over.");
+                imprimirMatriz(campo, true);
+                jogoAtivo = false;
+            } 
+            else if (campo[linhaEscolhida][colunaEscolhida] == 1) {
+                System.out.println("\nVocê já marcou essa posição com 'x'! Tente outra.");
+            } 
+            else {
+                campo[linhaEscolhida][colunaEscolhida] = 1;
+                pontuacao++;
+
+                if (temBombaAoRedor(campo, linhaEscolhida, colunaEscolhida)) {
+                    System.out.println("\nCuidado: bomba próxima!");
+                } else {
+                    System.out.println("\nPosição segura! Continue jogando.");
+                }
+
+                if (pontuacao == totalParaVencer) {
+                    System.out.println("\nParabéns, você ganhou o jogo!");
+                    System.out.println("Pontuação final: " + pontuacao);
+                    imprimirMatriz(campo, true);
+                    jogoAtivo = false;
+                }
+            }
+        }
+
+        leia.close();
+    }
+}
